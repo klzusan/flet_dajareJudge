@@ -13,3 +13,8 @@ class StartVoiceButton(VoiceButton):
 @ft.control
 class FinishVoiceButton(VoiceButton):
     bgcolor: ft.Colors = ft.Colors.RED
+
+@ft.control
+class GenTxt(ft.Text):
+    color: ft.Colors = ft.Colors.BLACK
+    textAlign: ft.TextAlign = ft.TextAlign.CENTER

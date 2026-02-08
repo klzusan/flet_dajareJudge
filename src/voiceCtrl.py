@@ -18,23 +18,29 @@ import components as cp
 class voiceControlApp(ft.Container):
     def __init__(self):
         super().__init__()
+        self.width=350
 
         # 音声認識エンジンを保持
         self.recog_engine = VoiceRecog(on_update_callback=self.update_result_ui)
         # ダジャレを採点するLLM
         self.judge_engine = LLM_Proc(on_update_callback=self.update_llm_ui)
         
-        self.status_text = ft.Text("", )
-        self.result_display = ft.Text("ここに（ry")
+        # 画面表示
+        self.appTitle = cp.GenTxt("がっくんのダジャレ採点器", weight=ft.FontWeight.BOLD, size = 30)
+        self.status_text = cp.GenTxt("準備完了", weight=ft.FontWeight.BOLD)
+        self.result_display = cp.GenTxt("")
 
         # LLMの結果表示
-        self.llm_result_area = ft.Column(visible=False)
-        self.dajare_text = ft.Text(size=20)
-        self.eval_text = ft.Text(size=25, color=ft.Colors.AMBER_700)
-        self.reason_text = ft.Text(italic=True)
+        self.llm_result_area = ft.Column(
+            visible=False,
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            width=self.width
+        )
+        self.dajare_text = cp.GenTxt("", size=20)
+        self.eval_text = cp.GenTxt("", size=30, weight=ft.FontWeight.BOLD, color=ft.Colors.RED)
+        self.reason_text = cp.GenTxt("")
         self.llm_result_area.controls = [
-            ft.Divider(),
-            ft.Text("[判定結果] ", size=12),
             self.dajare_text,
             self.eval_text,
             self.reason_text
@@ -56,13 +62,16 @@ class voiceControlApp(ft.Container):
 
         # Fletページ
         self.content = ft.Column(
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
+                self.appTitle,
                 self.status_text,
                 self.result_display,
+                self.llm_result_area,
                 self.btn_start,
                 self.btn_finish,
-                self.llm_result_area,
-            ]
+            ],
+            spacing=10,
         )
 
     async def button_clicked(self, e):
@@ -94,13 +103,14 @@ class voiceControlApp(ft.Container):
             self.page.update()
 
     async def update_llm_ui(self, response):
+        self.result_display.visible = False
         if response is None:
             self.status_text.value = "サーバが混雑しています．もう一度試してね"
             self.page.update()
             return
         res_data = response.parsed
 
-        self.dajare_text.value = f"「{res_data.dajare}」"
+        self.dajare_text.value = f"「{res_data.dajare}」の判定結果"
         self.eval_text.value = res_data.evaluation
         self.reason_text.value = res_data.reason
 
